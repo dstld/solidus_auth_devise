@@ -17,9 +17,15 @@ class Spree::UsersController < Spree::StoreController
         session[:guest_token] = nil
       end
 
-      redirect_back_or_default(root_url)
+      respond_to do |format|
+        format.html { redirect_back_or_default(root_url) }
+        format.json { render json: @user, status: 200 }
+      end
     else
-      render :new
+      respond_to do |format|
+        format.html { redirect_back_or_default(root_url) }
+        format.json { render json: @user, status: 422 }
+      end
     end
   end
 
@@ -31,9 +37,15 @@ class Spree::UsersController < Spree::StoreController
           bypass_sign_in(@user)
         end
       end
-      redirect_to spree.account_url, notice: Spree.t(:account_updated)
+      respond_to do |format|
+        format.html { redirect_to spree.account_url, notice: Spree.t(:account_updated) }
+        format.json { render json: @user, status: 200 }
+      end
     else
-      render :edit
+      respond_to do |format|
+        format.html { render :edit }
+        format.json { render json: @user, status: 200 }
+      end
     end
   end
 

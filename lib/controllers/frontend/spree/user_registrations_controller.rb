@@ -15,10 +15,14 @@ class Spree::UserRegistrationsController < Devise::RegistrationsController
       set_flash_message(:notice, :signed_up)
       sign_in(:spree_user, resource)
       session[:spree_user_signup] = true
-      respond_with resource, location: after_sign_up_path_for(resource)
+      respond_to do |format|
+        format.json { render json: resource, status: 200 }
+        format.html { respond_with resource, location: after_sign_up_path_for(resource) }
+      end
     else
       clean_up_passwords(resource)
-      respond_with(resource) do |format|
+      respond_to do |format|
+        format.json { render json: resource, status: 422 }
         format.html { render :new }
       end
     end

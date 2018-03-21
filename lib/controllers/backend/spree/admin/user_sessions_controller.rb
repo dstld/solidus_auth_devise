@@ -8,6 +8,21 @@ class Spree::Admin::UserSessionsController < Devise::SessionsController
   helper 'spree/admin/navigation'
   layout 'spree/layouts/admin'
 
+  def after_sign_in_path_for(user)
+    if can?(:display, Spree::Order) && can?(:admin, Spree::Order)
+      spree.admin_orders_path
+    else
+      raise CanCan::AccessDenied
+    end
+  end
+
+  def respond_to_on_destroy
+    respond_to do |format|
+      format.all { head :no_content }
+      format.any(*navigational_formats) { redirect_to admin_path }
+    end
+  end
+
   def create
     authenticate_spree_user!
 

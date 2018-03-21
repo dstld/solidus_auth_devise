@@ -13,11 +13,15 @@ Spree::CheckoutController.class_eval do
 
   def update_registration
     if params[:order][:email] =~ Devise.email_regexp && current_order.update_attributes(email: params[:order][:email])
-      redirect_to spree.checkout_path
+      respond_to do |format|
+        format.json { render json: current_order, status: 200 }
+      end
     else
       flash[:registration_error] = t(:email_is_invalid, scope: [:errors, :messages])
       @user = Spree::User.new
-      render 'registration'
+      respond_to do |format|
+        format.json { render json: @user, status: 422 }
+      end
     end
   end
 
@@ -40,7 +44,9 @@ Spree::CheckoutController.class_eval do
     def check_registration
       return unless registration_required?
       store_location
-      redirect_to spree.checkout_registration_path
+      unless request.xhr?
+        redirect_to spree.checkout_registration_path
+      end
     end
 
     def registration_required?

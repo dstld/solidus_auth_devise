@@ -18,9 +18,13 @@ class Spree::UserPasswordsController < Devise::PasswordsController
 
     if resource.errors.empty?
       set_flash_message(:notice, :send_instructions) if is_navigational_format?
-      respond_with resource, location: spree.login_path
+      respond_to do |format|
+        format.json { render json: resource, status: 200 }
+      end
     else
-      respond_with_navigational(resource) { render :new }
+      respond_to do |format|
+        format.json { render json: resource, status: 422 }
+      end
     end
   end
 
@@ -32,7 +36,13 @@ class Spree::UserPasswordsController < Devise::PasswordsController
       self.resource = resource_class.new
       resource.reset_password_token = params[:spree_user][:reset_password_token]
       set_flash_message(:error, :cannot_be_blank)
-      render :edit
+      respond_to do |format|
+        format.json {
+          resource.errors.add(:password, "blank")
+          render json: resource, status: 422
+        }
+        format.html { render :edit }
+      end
     else
       super
     end
